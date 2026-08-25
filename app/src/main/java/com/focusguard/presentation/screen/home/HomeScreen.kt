@@ -172,7 +172,7 @@ fun HomeScreen(
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterAlignment) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "No active tasks",
                             style = MaterialTheme.typography.titleMedium,
