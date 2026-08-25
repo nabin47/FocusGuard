@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusGuard — Focus on what matters.</title>
+  <meta name="description" content="FocusGuard helps you stay focused by turning distracting apps into a reason to get back to your tasks." />
+  <meta name="theme-color" content="#0F0F0F" />
+
+  <!-- Open Graph / Social Metadata -->
+  <meta property="og:title" content="FocusGuard — Focus on what matters." />
+  <meta property="og:description" content="FocusGuard helps you stay focused by turning distracting apps into a reason to get back to your tasks." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nabin47.github.io/FocusGuard/" />
+
+  <!-- Relative stylesheet link for GitHub Pages subpath compatibility -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- =========================================================================
+       CONFIGURATION INSTRUCTIONS:
+       Replace 'nabin47' below with your actual GitHub Username.
+       Example: https://github.com/octocat/FocusGuard/releases/latest
+       ========================================================================= -->
+
+  <!-- Navigation Bar -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav" aria-label="Main Navigation">
+        <a href="#" class="logo" aria-label="FocusGuard Home">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>FocusGuard</span>
+        </a>
+
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="#privacy" class="nav-link">Privacy</a></li>
+          <!-- GitHub Link -->
+          <li><a href="https://github.com/nabin47/FocusGuard/releases/latest" class="nav-link">Download</a></li>
+          <!-- GitHub Link -->
+          <li><a href="https://github.com/nabin47/FocusGuard" class="nav-link" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <span class="section-tag">Android Productivity</span>
+          <h1>Focus on what matters.</h1>
+          <p>
+            FocusGuard helps you stay focused by turning distracting apps into a reason to get back to your tasks. Define your goals, lock distractions, and reclaim your time.
+          </p>
+          <div class="btn-group">
+            <!-- GitHub Link -->
+            <a href="https://github.com/nabin47/FocusGuard/releases/latest" class="btn btn-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download APK
+            </a>
+            <!-- GitHub Link -->
+            <a href="https://github.com/nabin47/FocusGuard" class="btn btn-secondary" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+              View on GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Phone Mockup Preview -->
+        <div class="phone-mockup-wrapper">
+          <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="app-title">FocusGuard</div>
+
+              <div class="status-pill active">
+                ● FOCUS ACTIVE — 2 tasks remaining
+              </div>
+
+              <div class="app-section-title">ACTIVE TASKS</div>
+              <div class="task-list">
+                <div class="task-card">
+                  <div class="checkbox"></div>
+                  <span>Complete project documentation</span>
+                </div>
+                <div class="task-card">
+                  <div class="checkbox"></div>
+                  <span>Review pull requests</span>
+                </div>
+                <div class="task-card" style="opacity: 0.5;">
+                  <div class="checkbox checked"></div>
+                  <span style="text-decoration: line-through;">Set up Gradle workflow</span>
+                </div>
+              </div>
+
+              <div class="mockup-actions">
+                <div class="mockup-btn mockup-btn-secondary">Blocked Apps (3)</div>
+                <div class="mockup-btn mockup-btn-primary">STOP FOCUS SESSION</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Section -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Core Capabilities</span>
+        <h2>Designed for intentional focus.</h2>
+        <p>A lightweight, distraction-free environment that keeps your priorities front and center.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3>Focus Sessions</h3>
+          <p>Initiate targeted focus sessions that keep selected apps locked until your task list is clear.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3>Block Distracting Apps</h3>
+          <p>Select specific installed apps to restrict during active sessions. Foreground monitoring prevents unwanted slips.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <h3>Task-Based Focus</h3>
+          <p>Focus ends automatically when all tasks are checked off. Your work dictates when distractions unlock.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3>Simple & Private</h3>
+          <p>Runs entirely on your device with local SQLite persistence. No cloud accounts or remote servers required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Simple Workflow</span>
+        <h2>How FocusGuard Works</h2>
+        <p>Three straightforward steps to guard your attention.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h3>Add your tasks</h3>
+          <p>Define what needs to be accomplished during your focus period.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h3>Choose distracting apps</h3>
+          <p>Select which social media, media, or game apps you want restricted.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h3>Start focusing</h3>
+          <p>FocusGuard monitors active foreground apps and displays a full-screen overlay if a blocked app is launched.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- App Preview Section -->
+  <section class="section">
+    <div class="container">
+      <div class="preview-grid">
+        <div class="preview-text">
+          <span class="section-tag">Redirection Overlay</span>
+          <h2>A persistent reminder when you stray.</h2>
+          <p>
+            When you attempt to open a blocked app during an active focus session, FocusGuard displays a full-screen overlay displaying your remaining tasks and a single clear action to return to focus.
+          </p>
+        </div>
+
+        <div class="overlay-mockup-card">
+          <div class="overlay-tag">APP BLOCKED</div>
+          <h3 style="font-size: 1.75rem; margin-bottom: 8px;">Stay Focused</h3>
+          <p style="font-size: 0.9rem; margin-bottom: 24px;">You locked this app until your active tasks are marked complete.</p>
+
+          <div class="app-section-title" style="text-align: left;">REMAINING TASKS (2)</div>
+          <div class="task-list" style="margin-bottom: 24px;">
+            <div class="task-card">
+              <div class="checkbox"></div>
+              <span style="font-size: 0.85rem;">Complete project documentation</span>
+            </div>
+            <div class="task-card">
+              <div class="checkbox"></div>
+              <span style="font-size: 0.85rem;">Review pull requests</span>
+            </div>
+          </div>
+
+          <div class="mockup-btn mockup-btn-primary">GO BACK AND FOCUS</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy Section -->
+  <section id="privacy" class="section">
+    <div class="container">
+      <div class="privacy-box">
+        <span class="section-tag">Privacy & Security</span>
+        <h2>On-Device & Local First</h2>
+        <p>
+          FocusGuard is designed as a personal, on-device productivity tool. It requires Android system permissions strictly to monitor foreground app transitions and display the overlay screen.
+        </p>
+
+        <ul class="privacy-list">
+          <li class="privacy-item">
+            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>No user accounts or cloud sign-in required.</span>
+          </li>
+          <li class="privacy-item">
+            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Tasks and blocked app lists are stored locally in Room SQLite database.</span>
+          </li>
+          <li class="privacy-item">
+            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Usage Access permission is evaluated locally to check foreground package names.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download CTA Section -->
+  <section class="section download-section">
+    <div class="container">
+      <div class="download-box">
+        <h2>Ready to focus?</h2>
+        <p>Get FocusGuard for Android 8.0+ and start getting more done with intentional focus.</p>
+        <!-- GitHub Link -->
+        <a href="https://github.com/nabin47/FocusGuard/releases/latest" class="btn btn-primary" style="font-size: 1.1rem; padding: 16px 36px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download FocusGuard APK
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>FocusGuard</span>
+          </a>
+          <p>Built for intentional focus.</p>
+        </div>
+
+        <ul class="footer-links">
+          <!-- GitHub Link -->
+          <li><a href="https://github.com/nabin47/FocusGuard" class="footer-link" target="_blank" rel="noopener">GitHub Repository</a></li>
+          <!-- GitHub Link -->
+          <li><a href="https://github.com/nabin47/FocusGuard/releases" class="footer-link" target="_blank" rel="noopener">Releases</a></li>
+          <!-- GitHub Link -->
+          <li><a href="https://github.com/nabin47/FocusGuard/releases/latest" class="footer-link">Download APK</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 FocusGuard. Open Source Project under MIT License.</p>
+        <p>Android is a trademark of Google LLC.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
