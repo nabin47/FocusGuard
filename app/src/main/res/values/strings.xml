@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FocusGuard</string>
+    <string name="notification_channel_name">Focus Guard Monitoring</string>
+    <string name="notification_channel_desc">Active foreground service to monitor and block distracting apps during focus sessions.</string>
+    <string name="notification_title">FocusGuard Active</string>
+    <string name="notification_text">Monitoring active session. Stay focused!</string>
+</resources>
