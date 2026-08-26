@@ -34,6 +34,7 @@ class FocusMonitorService : Service() {
     lateinit var focusSessionRepository: FocusSessionRepository
 
     private val monitorScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var isMonitoring = false
 
     companion object {
         private const val CHANNEL_ID = "focus_guard_monitor_channel"
@@ -51,7 +52,9 @@ class FocusMonitorService : Service() {
         when (intent?.action) {
             ACTION_START -> {
                 startForegroundWithNotification()
-                startMonitoring()
+                if (!isMonitoring) {
+                    startMonitoring()
+                }
             }
             ACTION_STOP -> {
                 stopForeground(STOP_FOREGROUND_REMOVE)
@@ -59,7 +62,9 @@ class FocusMonitorService : Service() {
             }
             else -> {
                 startForegroundWithNotification()
-                startMonitoring()
+                if (!isMonitoring) {
+                    startMonitoring()
+                }
             }
         }
         return START_STICKY
@@ -85,18 +90,32 @@ class FocusMonitorService : Service() {
     }
 
     private fun startMonitoring() {
+        isMonitoring = true
+
+        // Observe session state to auto stop service when focus is no longer active
         monitorScope.launch {
             focusSessionRepository.sessionState.collect { sessionState ->
-                while (isActive && sessionState.isFocusActive) {
+                if (!sessionState.isFocusActive) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                }
+            }
+        }
+
+        // Polling loop checking current dynamic session state
+        monitorScope.launch {
+            while (isActive) {
+                val currentState = focusSessionRepository.sessionState.value
+                if (currentState.isFocusActive) {
                     val foregroundApp = usageWatcher.getForegroundApp()
                     if (foregroundApp != null && foregroundApp != packageName) {
-                        val isBlocked = sessionState.blockedApps.any { it.packageName == foregroundApp }
+                        val isBlocked = currentState.blockedApps.any { it.packageName == foregroundApp }
                         if (isBlocked) {
                             showBlockOverlay()
                         }
                     }
-                    delay(1000L)
                 }
+                delay(1000L)
             }
         }
     }
@@ -123,6 +142,7 @@ class FocusMonitorService : Service() {
     }
 
     override fun onDestroy() {
+        isMonitoring = false
         monitorScope.cancel()
         super.onDestroy()
     }
