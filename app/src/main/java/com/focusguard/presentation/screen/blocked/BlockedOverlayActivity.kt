@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -67,6 +68,9 @@ class BlockedOverlayActivity : ComponentActivity() {
                         }
                         startActivity(intent)
                         finish()
+                    },
+                    onAutoFinish = {
+                        finish()
                     }
                 )
             }
@@ -77,9 +81,18 @@ class BlockedOverlayActivity : ComponentActivity() {
 @Composable
 fun BlockedOverlayScreen(
     viewModel: HomeViewModel,
-    onReturnToFocusGuard: () -> Unit
+    onReturnToFocusGuard: () -> Unit,
+    onAutoFinish: () -> Unit
 ) {
     val tasks by viewModel.tasks.collectAsState()
+    val sessionState by viewModel.sessionState.collectAsState()
+
+    // Auto dismiss overlay when focus session turns inactive (e.g. all tasks marked complete)
+    LaunchedEffect(sessionState.isFocusActive) {
+        if (!sessionState.isFocusActive) {
+            onAutoFinish()
+        }
+    }
 
     Box(
         modifier = Modifier
