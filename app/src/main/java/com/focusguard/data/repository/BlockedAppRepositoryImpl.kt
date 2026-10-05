@@ -12,23 +12,12 @@ class BlockedAppRepositoryImpl @Inject constructor(
     private val blockedAppDao: BlockedAppDao
 ) : BlockedAppRepository {
 
-    override fun getBlockedApps(): Flow<List<BlockedApp>> {
-        return blockedAppDao.getBlockedApps().map { entities ->
-            entities.map { it.toDomain() }
-        }
-    }
+    override fun getBlockedApps(): Flow<List<BlockedApp>> =
+        blockedAppDao.getBlockedApps().map { entities -> entities.map { it.toDomain() } }
 
-    override suspend fun addBlockedApp(packageName: String, appName: String) {
+    override suspend fun addBlockedApp(packageName: String, appName: String) =
         blockedAppDao.insertBlockedApp(BlockedAppEntity(packageName = packageName, appName = appName))
-    }
 
-    override suspend fun removeBlockedApp(packageName: String) {
+    override suspend fun removeBlockedApp(packageName: String) =
         blockedAppDao.deleteBlockedApp(packageName)
-    }
-
-    private fun BlockedAppEntity.toDomain(): BlockedApp = BlockedApp(
-        packageName = packageName,
-        appName = appName,
-        addedAt = addedAt
-    )
 }

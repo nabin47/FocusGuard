@@ -12,35 +12,27 @@ class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
 
-    override fun getActiveTasks(): Flow<List<Task>> {
-        return taskDao.getActiveTasks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+    override fun getActiveTasks(): Flow<List<Task>> =
+        taskDao.getActiveTasks().map { entities -> entities.map { it.toDomain() } }
+
+    override fun getAllTasks(): Flow<List<Task>> =
+        taskDao.getAllTasks().map { entities -> entities.map { it.toDomain() } }
+
+    override fun getTasksCompletedSince(since: Long): Flow<List<Task>> =
+        taskDao.getTasksCompletedSince(since).map { entities -> entities.map { it.toDomain() } }
+
+    override suspend fun addTask(title: String): Long = taskDao.insertTask(TaskEntity(title = title))
+
+    override suspend fun completeTask(taskId: Long) = taskDao.markAsCompleted(taskId)
+
+    override suspend fun reopenTask(taskId: Long) = taskDao.markAsActive(taskId)
+
+    override suspend fun deleteTask(taskId: Long) = taskDao.deleteTask(taskId)
+
+    override suspend fun restoreTask(task: Task) {
+        taskDao.insertTask(task.toEntity())
     }
 
-    override fun getAllTasks(): Flow<List<Task>> {
-        return taskDao.getAllTasks().map { entities ->
-            entities.map { it.toDomain() }
-        }
-    }
-
-    override suspend fun addTask(title: String): Long {
-        return taskDao.insertTask(TaskEntity(title = title))
-    }
-
-    override suspend fun completeTask(taskId: Long) {
-        taskDao.markAsCompleted(taskId)
-    }
-
-    override suspend fun deleteTask(taskId: Long) {
-        taskDao.deleteTask(taskId)
-    }
-
-    private fun TaskEntity.toDomain(): Task = Task(
-        id = id,
-        title = title,
-        isCompleted = isCompleted,
-        createdAt = createdAt,
-        completedAt = completedAt
-    )
+    override suspend fun countCompletedBetween(from: Long, to: Long): Int =
+        taskDao.countCompletedBetween(from, to)
 }

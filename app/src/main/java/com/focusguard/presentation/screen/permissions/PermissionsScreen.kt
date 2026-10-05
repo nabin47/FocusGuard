@@ -1,13 +1,15 @@
 package com.focusguard.presentation.screen.permissions
 
-import android.app.AppOpsManager
-import android.content.Context
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
-import android.os.Process
+import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,47 +17,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import com.focusguard.presentation.theme.AcidGreen
-import com.focusguard.presentation.theme.DarkBackground
-import com.focusguard.presentation.theme.DarkOnSurface
-import com.focusguard.presentation.theme.DarkOnSurfaceMuted
-import com.focusguard.presentation.theme.DarkSurface
-
-fun hasUsageStatsPermission(context: Context): Boolean {
-    val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-    val mode = appOps.checkOpNoThrow(
-        AppOpsManager.OPSTR_GET_USAGE_STATS,
-        Process.myUid(),
-        context.packageName
-    )
-    return mode == AppOpsManager.MODE_ALLOWED
-}
-
-fun hasOverlayPermission(context: Context): Boolean {
-    return Settings.canDrawOverlays(context)
-}
+import com.focusguard.presentation.component.OnResume
+import com.focusguard.presentation.component.PrimaryButton
+import com.focusguard.presentation.component.SecondaryButton
+import com.focusguard.presentation.util.hasNotificationPermission
+import com.focusguard.presentation.util.hasOverlayPermission
+import com.focusguard.presentation.util.hasUsageStatsPermission
 
 @Composable
 fun PermissionsScreen(
@@ -65,153 +53,137 @@ fun PermissionsScreen(
     val context = LocalContext.current
     var hasUsageStats by remember { mutableStateOf(hasUsageStatsPermission(context)) }
     var hasOverlay by remember { mutableStateOf(hasOverlayPermission(context)) }
+    var hasNotifications by remember { mutableStateOf(hasNotificationPermission(context)) }
+    val allRequiredGranted = hasUsageStats && hasOverlay
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                hasUsageStats = hasUsageStatsPermission(context)
-                hasOverlay = hasOverlayPermission(context)
-                if (hasUsageStats && hasOverlay) {
-                    onAllPermissionsGranted()
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+    val notificationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> hasNotifications = granted }
+
+    // Re-check whenever the user comes back from the system settings.
+    OnResume {
+        hasUsageStats = hasUsageStatsPermission(context)
+        hasOverlay = hasOverlayPermission(context)
+        hasNotifications = hasNotificationPermission(context)
+        if (hasUsageStats && hasOverlay) {
+            onAllPermissionsGranted()
         }
     }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Permissions Setup",
+            text = "Let's set up FocusGuard",
             style = MaterialTheme.typography.displayLarge,
-            color = DarkOnSurface
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "FocusGuard needs special system permissions to detect when blocked apps are opened and display the focus overlay.",
+            text = "Two system permissions let FocusGuard notice when a blocked app opens and cover it until your tasks are done. Nothing leaves your device.",
             style = MaterialTheme.typography.bodyLarge,
-            color = DarkOnSurfaceMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // Step 1: Usage Access
-        Card(
-            colors = CardDefaults.cardColors(containerColor = DarkSurface),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "1. Usage Access",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DarkOnSurface
-                    )
-                    Text(
-                        text = if (hasUsageStats) "GRANTED" else "REQUIRED",
-                        color = if (hasUsageStats) AcidGreen else DarkOnSurfaceMuted,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "FocusGuard needs to see which app is currently open so it can block distractions.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = DarkOnSurfaceMuted
+        PermissionStep(
+            number = 1,
+            title = "Usage Access",
+            description = "See which app is currently open so distractions can be blocked.",
+            granted = hasUsageStats,
+            actionLabel = "Grant Usage Access",
+            onAction = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        PermissionStep(
+            number = 2,
+            title = "Display Over Other Apps",
+            description = "Show the full-screen focus reminder on top of a blocked app.",
+            granted = hasOverlay,
+            actionLabel = "Grant Overlay Permission",
+            onAction = {
+                context.startActivity(
+                    Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
                 )
-                if (!hasUsageStats) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = AcidGreen, contentColor = DarkBackground),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Grant Usage Access", fontWeight = FontWeight.Bold)
-                    }
-                }
             }
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Spacer(modifier = Modifier.height(12.dp))
+            PermissionStep(
+                number = 3,
+                title = "Notifications (optional)",
+                description = "Shows a live session timer and remaining tasks in your notification shade.",
+                granted = hasNotifications,
+                actionLabel = "Allow Notifications",
+                secondary = true,
+                onAction = { notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // Step 2: Overlay Permission
-        Card(
-            colors = CardDefaults.cardColors(containerColor = DarkSurface),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+        PrimaryButton(
+            text = if (allRequiredGranted) "Continue to FocusGuard" else "Grant the permissions above to continue",
+            enabled = allRequiredGranted,
+            onClick = onAllPermissionsGranted
+        )
+    }
+}
+
+@Composable
+private fun PermissionStep(
+    number: Int,
+    title: String,
+    description: String,
+    granted: Boolean,
+    actionLabel: String,
+    onAction: () -> Unit,
+    secondary: Boolean = false
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(color = colors.surface, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(if (granted) colors.primary else colors.surfaceVariant),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "2. Display Over Other Apps",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DarkOnSurface
-                    )
-                    Text(
-                        text = if (hasOverlay) "GRANTED" else "REQUIRED",
-                        color = if (hasOverlay) AcidGreen else DarkOnSurfaceMuted,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Required to display the full-screen focus overlay when a blocked app is detected.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = DarkOnSurfaceMuted
-                )
-                if (!hasOverlay) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            val intent = Intent(
-                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                Uri.parse("package:${context.packageName}")
-                            )
-                            context.startActivity(intent)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = AcidGreen, contentColor = DarkBackground),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Grant Overlay Permission", fontWeight = FontWeight.Bold)
+                    if (granted) {
+                        Icon(Icons.Filled.Check, contentDescription = "Granted", tint = colors.onPrimary, modifier = Modifier.size(18.dp))
+                    } else {
+                        Text(number.toString(), style = MaterialTheme.typography.titleSmall, color = colors.onSurface)
                     }
                 }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(title, style = MaterialTheme.typography.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
+                Text(
+                    text = if (granted) "GRANTED" else if (secondary) "OPTIONAL" else "REQUIRED",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (granted) colors.primary else colors.onSurfaceVariant
+                )
             }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        if (hasUsageStats && hasOverlay) {
-            Button(
-                onClick = onAllPermissionsGranted,
-                colors = ButtonDefaults.buttonColors(containerColor = AcidGreen, contentColor = DarkBackground),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Continue to FocusGuard", fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            if (!granted) {
+                Spacer(modifier = Modifier.height(16.dp))
+                if (secondary) {
+                    SecondaryButton(text = actionLabel, onClick = onAction)
+                } else {
+                    PrimaryButton(text = actionLabel, onClick = onAction)
+                }
             }
         }
     }

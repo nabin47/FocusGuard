@@ -4,4 +4,8 @@
     <string name="notification_channel_desc">Active foreground service to monitor and block distracting apps during focus sessions.</string>
     <string name="notification_title">FocusGuard Active</string>
     <string name="notification_text">Monitoring active session. Stay focused!</string>
+    <plurals name="notification_tasks_left">
+        <item quantity="one">%d task left — stay focused!</item>
+        <item quantity="other">%d tasks left — stay focused!</item>
+    </plurals>
 </resources>

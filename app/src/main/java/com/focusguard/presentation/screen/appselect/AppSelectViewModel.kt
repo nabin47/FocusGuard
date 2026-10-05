@@ -3,19 +3,17 @@ package com.focusguard.presentation.screen.appselect
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.focusguard.domain.model.BlockedApp
-import com.focusguard.domain.usecase.AddBlockedAppUseCase
-import com.focusguard.domain.usecase.GetBlockedAppsUseCase
-import com.focusguard.domain.usecase.RemoveBlockedAppUseCase
+import com.focusguard.domain.repository.BlockedAppRepository
+import com.focusguard.domain.repository.FocusSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,37 +25,46 @@ data class InstalledAppItem(
     val isBlocked: Boolean
 )
 
+data class AppSelectUiState(
+    val isLoading: Boolean = true,
+    val apps: List<InstalledAppItem> = emptyList(),
+    val blockedCount: Int = 0,
+    /** During a session apps can be added to the block list but not removed. */
+    val isFocusActive: Boolean = false
+)
+
 @HiltViewModel
 class AppSelectViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val getBlockedAppsUseCase: GetBlockedAppsUseCase,
-    private val addBlockedAppUseCase: AddBlockedAppUseCase,
-    private val removeBlockedAppUseCase: RemoveBlockedAppUseCase
+    private val blockedAppRepository: BlockedAppRepository,
+    focusSessionRepository: FocusSessionRepository
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _installedApps = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    // null until the installed apps have been loaded.
+    private val installedApps = MutableStateFlow<List<Pair<String, String>>?>(null)
 
-    val appList: StateFlow<List<InstalledAppItem>> = combine(
-        _installedApps,
-        getBlockedAppsUseCase(),
-        _searchQuery
-    ) { installed, blocked, query ->
+    val uiState: StateFlow<AppSelectUiState> = combine(
+        installedApps,
+        blockedAppRepository.getBlockedApps(),
+        _searchQuery,
+        focusSessionRepository.sessionState
+    ) { installed, blocked, query, session ->
         val blockedPackages = blocked.map { it.packageName }.toSet()
-        installed
+        val apps = installed.orEmpty()
             .filter { (name, pkg) ->
                 query.isBlank() || name.contains(query, ignoreCase = true) || pkg.contains(query, ignoreCase = true)
             }
-            .map { (name, pkg) ->
-                InstalledAppItem(
-                    appName = name,
-                    packageName = pkg,
-                    isBlocked = blockedPackages.contains(pkg)
-                )
-            }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            .map { (name, pkg) -> InstalledAppItem(name, pkg, isBlocked = pkg in blockedPackages) }
+        AppSelectUiState(
+            isLoading = installed == null,
+            apps = apps,
+            blockedCount = blockedPackages.size,
+            isFocusActive = session.isFocusActive
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppSelectUiState())
 
     init {
         loadInstalledApps()
@@ -66,29 +73,18 @@ class AppSelectViewModel @Inject constructor(
     private fun loadInstalledApps() {
         viewModelScope.launch(Dispatchers.IO) {
             val pm = context.packageManager
-            val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
-                addCategory(Intent.CATEGORY_LAUNCHER)
-            }
-            val resolveInfos = pm.queryIntentActivities(mainIntent, 0)
+            val mainIntent = Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER)
             val ownPackageName = context.packageName
 
-            val apps = resolveInfos
+            installedApps.value = pm.queryIntentActivities(mainIntent, 0)
                 .mapNotNull { resolveInfo ->
                     val appInfo = resolveInfo.activityInfo.applicationInfo
-                    val packageName = appInfo.packageName
-                    if (packageName == ownPackageName) return@mapNotNull null
-
-                    // Filter system apps if desired (keep non-system or launchable)
                     val isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                    if (isSystemApp) return@mapNotNull null
-
-                    val appName = pm.getApplicationLabel(appInfo).toString()
-                    Pair(appName, packageName)
+                    if (appInfo.packageName == ownPackageName || isSystemApp) return@mapNotNull null
+                    pm.getApplicationLabel(appInfo).toString() to appInfo.packageName
                 }
                 .distinctBy { it.second }
                 .sortedBy { it.first.lowercase() }
-
-            _installedApps.value = apps
         }
     }
 
@@ -97,11 +93,12 @@ class AppSelectViewModel @Inject constructor(
     }
 
     fun toggleAppBlocked(packageName: String, appName: String, shouldBlock: Boolean) {
+        if (!shouldBlock && uiState.value.isFocusActive) return
         viewModelScope.launch {
             if (shouldBlock) {
-                addBlockedAppUseCase(packageName, appName)
+                blockedAppRepository.addBlockedApp(packageName, appName)
             } else {
-                removeBlockedAppUseCase(packageName)
+                blockedAppRepository.removeBlockedApp(packageName)
             }
         }
     }
