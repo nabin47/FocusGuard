@@ -2,9 +2,11 @@ package com.focusguard.di
 
 import com.focusguard.data.repository.BlockedAppRepositoryImpl
 import com.focusguard.data.repository.FocusSessionRepositoryImpl
+import com.focusguard.data.repository.SessionHistoryRepositoryImpl
 import com.focusguard.data.repository.TaskRepositoryImpl
 import com.focusguard.domain.repository.BlockedAppRepository
 import com.focusguard.domain.repository.FocusSessionRepository
+import com.focusguard.domain.repository.SessionHistoryRepository
 import com.focusguard.domain.repository.TaskRepository
 import dagger.Binds
 import dagger.Module
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindFocusSessionRepository(
         impl: FocusSessionRepositoryImpl
     ): FocusSessionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSessionHistoryRepository(
+        impl: SessionHistoryRepositoryImpl
+    ): SessionHistoryRepository
 }

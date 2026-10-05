@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.focusguard.data.local.AppDatabase
 import com.focusguard.data.local.dao.BlockedAppDao
+import com.focusguard.data.local.dao.FocusSessionDao
 import com.focusguard.data.local.dao.TaskDao
 import dagger.Module
 import dagger.Provides
@@ -19,11 +20,16 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "focusguard.db").build()
+        Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NAME)
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideTaskDao(db: AppDatabase): TaskDao = db.taskDao()
 
     @Provides
     fun provideBlockedAppDao(db: AppDatabase): BlockedAppDao = db.blockedAppDao()
+
+    @Provides
+    fun provideFocusSessionDao(db: AppDatabase): FocusSessionDao = db.focusSessionDao()
 }
